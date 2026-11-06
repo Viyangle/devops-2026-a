@@ -6,8 +6,8 @@ B,正常,两轮构建与同镜像hello E3,未执行（本组走 A 轨道）,—,
 B,故障,输出不符及无效候选及构建失败及超时均识别,未执行（本组走 A 轨道）,—,N/A
 B,清理,运行超时容器已移除,未执行（本组走 A 轨道）,—,N/A
 共同,新增测试,输入预期明确且测试通过,tests/e7 由 6 项增至 7 项并全部 OK,tests/e7/test_e7_gate_rejections.py；work/logs/unit-before.log、unit-after.log,PASS
-共同,正常CI,检查通过且artifact已下载,未执行（尚未建 GitHub 仓库）,—,未完成
-共同,保护,检查名正确且strict与enforce_admins为true,未执行（尚未建 GitHub 仓库）,—,未完成
-共同,拒绝合并,OPEN及BLOCKED且普通合并退出1,未执行（尚未建 GitHub 仓库）,—,未完成
-共同,恢复,同一PR最新检查通过,未执行（尚未建 GitHub 仓库）,—,未完成
-共同,合并,MERGED及mergeCommit及mergedAt记录齐全,未执行（尚未建 GitHub 仓库）,—,未完成
+共同,正常CI,检查通过且artifact已下载,run 42154773534 success（29s），192 个文件 artifact 已下载,https://github.com/Viyangle/devops-2026-a/actions/runs/42154773534；work/ci-normal/,PASS
+共同,保护,检查名正确且strict与enforce_admins为true,e7-a-quality-gate / app_id 15368 / strict=true / enforce_admins=true,work/ci-rejection/protection.json；ci/A-main-protection.json,PASS
+共同,拒绝合并,OPEN及BLOCKED且普通合并退出1,state=OPEN、mergeStateStatus=BLOCKED、gh pr merge 退出码 1,https://github.com/Viyangle/devops-2026-a/pull/1；work/ci-rejection/merge-rejection.log、PR.json,PASS
+共同,恢复,同一PR最新检查通过,run 42155197007 success，16 passed，PR CLEAN,https://github.com/Viyangle/devops-2026-a/actions/runs/42155197007；work/ci-recovery/PR-before-merge.json,PASS
+共同,合并,MERGED及mergeCommit及mergedAt记录齐全,state=MERGED，mergeCommit 91f482b，mergedAt 2026-11-06T03:14:37Z,work/ci-recovery/PR-merged.json,PASS
