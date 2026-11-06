@@ -5,10 +5,13 @@ import os
 from pathlib import Path
 import re
 import shutil
+import signal
 import subprocess
 import sys
 
 ROOT = Path('/var/lib/e7-a-ci')
+# Finish the bounded job and its evidence even if the SSH client disconnects.
+signal.signal(signal.SIGHUP, signal.SIG_IGN)
 match = re.fullmatch(r'(run|fetch) ([0-9]+-[0-9]+) ([0-9a-f]{40})(?: (true|false))?',
                      os.environ.get('SSH_ORIGINAL_COMMAND', ''))
 if not match:
@@ -50,5 +53,18 @@ except Exception as error:
     (evidence / 'dispatch-error.txt').write_text(str(error) + '\n')
     print(error, file=sys.stderr)
 finally:
+    if code != 0:
+        cleanup = []
+        for cid_file in evidence.glob('gate/*/container-id.txt'):
+            cid = cid_file.read_text().strip()
+            if re.fullmatch(r'[0-9a-f]{64}', cid):
+                try:
+                    result = subprocess.run(['docker', 'rm', '-f', cid], capture_output=True,
+                                            text=True, timeout=10)
+                    cleanup.append({'container': cid, 'exit_code': result.returncode,
+                                    'stdout': result.stdout, 'stderr': result.stderr})
+                except subprocess.TimeoutExpired:
+                    cleanup.append({'container': cid, 'error': 'docker rm exceeded 10 seconds'})
+        (evidence / 'container-cleanup.json').write_text(json.dumps(cleanup, indent=2) + '\n')
     (evidence / 'exit-code.json').write_text(json.dumps({'exit_code': code, 'sha': sha}) + '\n')
 sys.exit(code)
