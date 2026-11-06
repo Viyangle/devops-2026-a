@@ -1,0 +1,20 @@
+{
+  "student": {
+    "name": "谢浩天",
+    "id": "241250033",
+    "group": "A09"
+  },
+  "target_repository": "https://github.com/Viyangle/devops-2026-a",
+  "branch": "student/241250033/e7",
+  "base_commit": "a90ef8ba134bc681ed302c23e61fadecab57a36c",
+  "source_group_commit": "1f09a2ad7b8cabff9a87b388a2b2d6be2bb7dfd1",
+  "execution_commit": "d2cbe210b2a90c34ebd10c360846314321d17d04",
+  "experiment_host": "60.204.240.40",
+  "verified_on": "2026-11-06",
+  "oracle_tests": 8,
+  "service_tests": 17,
+  "gate_cases": 8,
+  "archive": "E7_A_241250033_20261106.zip",
+  "archive_sha256": "8f50a8d2d4fb96b4c037e02bde36bbe4db0dd3857ab63733453efb9c15976822",
+  "historical_evidence_repository": "https://github.com/mcjiansheng/devops-e7-a-241250033"
+}

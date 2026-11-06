@@ -28,3 +28,9 @@ python3 scripts/lab_cloud.py gate --out work/e7-01
 ## CI
 
 `.github/workflows/e7-a-quality-gate.yml`：push 与 pull_request 都触发，运行八项门禁并把 `work/ci/` 归档为 artifact；main 已设必需检查（strict + enforce_admins），只能通过 PR 合并。
+
+## 个人实验提交
+
+| 姓名 | 学号 | 内容 | 实验结果 |
+|---|---|---|---|
+| 谢浩天 | 241250033 | [E7 源码、报告、证据及完整实验包](submissions/241250033/e7/README.md) | 判定测试 8 项、服务测试 17 项、门禁 8 项通过；同一 PR 完成拒绝、恢复和合并 |
