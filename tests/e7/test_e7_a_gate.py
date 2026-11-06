@@ -22,6 +22,20 @@ class OracleTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             gate.evaluate("original-1", 1, successful([]))
 
+    def test_extra_finding_is_rejected(self):
+        findings = [{"type": t, "target": target, "dependency": dep, "evidence": ["test"]} for t, target, dep in gate.EXPECTED]
+        findings.append({"type": "MISSING", "target": "main.o", "dependency": "extra.h", "evidence": ["test"]})
+        with self.assertRaisesRegex(ValueError, "Oracle mismatch"):
+            gate.evaluate("original-1", 1, successful(findings))
+
+
+    def test_missing_evidence_is_rejected(self):
+        findings = [{"type": t, "target": target, "dependency": dep, "evidence": ["test"]} for t, target, dep in gate.EXPECTED]
+        del findings[0]["evidence"]
+        with self.assertRaisesRegex(ValueError, "Finding has no evidence anchor"):
+            gate.evaluate("original-1", 1, successful(findings))
+
+
     def test_fixed_passes(self):
         gate.evaluate("fixed", 0, successful([]))
 
