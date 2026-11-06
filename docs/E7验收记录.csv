@@ -1,0 +1,13 @@
+轨道,检查项,预期,实际结果,证据路径或链接,PASS或FAIL
+A,原始三次,精确MD与RD一致,三次集合一致（MD main.o←config.h；RD main.o→unused.h）、trace_id 各不相同,work/e7-02/gate/original-1..3/evidence/findings.json,PASS
+A,修复,findings为空且仅Makefile变化,findings=[] 且只有 Makefile 的 input_sha256 变化,work/e7-02/gate/fixed/evidence/findings.json,PASS
+A,故障,FAILED或UNSUPPORTED或TIMED_OUT符合场景,CHECK_FAILED(build_exit=2)、UNSUPPORTED(build_exit=0)、TIMEOUT 均符合预期,work/e7-02/gate/{build-failed,unsupported,timeout}/evidence/findings.json,PASS
+B,正常,两轮构建与同镜像hello E3,未执行（本组走 A 轨道）,—,N/A
+B,故障,输出不符及无效候选及构建失败及超时均识别,未执行（本组走 A 轨道）,—,N/A
+B,清理,运行超时容器已移除,未执行（本组走 A 轨道）,—,N/A
+共同,新增测试,输入预期明确且测试通过,tests/e7 由 6 项增至 7 项并全部 OK,tests/e7/test_e7_gate_rejections.py；work/logs/unit-before.log、unit-after.log,PASS
+共同,正常CI,检查通过且artifact已下载,未执行（尚未建 GitHub 仓库）,—,未完成
+共同,保护,检查名正确且strict与enforce_admins为true,未执行（尚未建 GitHub 仓库）,—,未完成
+共同,拒绝合并,OPEN及BLOCKED且普通合并退出1,未执行（尚未建 GitHub 仓库）,—,未完成
+共同,恢复,同一PR最新检查通过,未执行（尚未建 GitHub 仓库）,—,未完成
+共同,合并,MERGED及mergeCommit及mergedAt记录齐全,未执行（尚未建 GitHub 仓库）,—,未完成
