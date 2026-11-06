@@ -1,0 +1,137 @@
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	﻿2026-11-06T04:40:58.2813707Z ##[group]Run set -euo pipefail
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2814733Z ^[[36;1mset -euo pipefail^[[0m
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2815836Z ^[[36;1mgit branch e7-ci "$SOURCE_SHA"^[[0m
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2817104Z ^[[36;1mgit bundle create "$RUNNER_TEMP/e7-source.bundle" --all^[[0m
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2818757Z ^[[36;1mssh -i "$RUNNER_TEMP/e7_ci_key" -o IdentitiesOnly=yes -o BatchMode=yes \^[[0m
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2820739Z ^[[36;1m  -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/e7_known_hosts" \^[[0m
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2822946Z ^[[36;1m  -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \^[[0m
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2824975Z ^[[36;1m  e7ci@60.204.240.40 "run $E7_RUN_ID $SOURCE_SHA $FAIL_DEMO" < "$RUNNER_TEMP/e7-source.bundle"^[[0m
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2843758Z shell: /usr/bin/bash -e {0}
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2844652Z env:
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2845506Z   SOURCE_SHA: 0a99f93a4198ef63e86ac9043f2fb612997f8b31
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2846625Z   E7_RUN_ID: 42163931563-1
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2847488Z   FAIL_DEMO: false
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:40:58.2848313Z ##[endgroup]
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5914970Z {
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5915578Z   "time": "2026-11-06T04:41:02.295885+00:00",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5916156Z   "hostname": "devops",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5916550Z   "os": "Ubuntu 24.04.4 LTS",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5916959Z   "kernel": "6.8.0-136-generic",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5917411Z   "arch": "x86_64",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5917794Z   "spec": {
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5918151Z     "cpus": 2,
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5918530Z     "mem_gib": 1.7,
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5918898Z     "disk_gib": 68.4
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5919278Z   },
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5919605Z   "tools": {
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5919960Z     "docker": "29.1.3",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5920386Z     "compose": "2.40.3+ds1-0ubuntu1~24.04.1",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5921143Z     "buildx": "github.com/docker/buildx 0.30.1 0.30.1-0ubuntu1~24.04.1",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5921789Z     "git": "git version 2.43.0",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5923671Z     "make": "GNU Make 4.3",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5924123Z     "python3": "Python 3.12.3"
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5924534Z   },
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5924851Z   "problems": [],
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5925213Z   "warnings": [
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5925857Z     "cpus=2 低于建议值 4",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5926282Z     "mem_gib=1.7 低于建议值 8",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5926752Z     "disk_gib=68.4 低于建议值 100",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5927449Z     "Docker 未配置镜像加速，拉取基础镜像可能很慢（见 setup/bootstrap_ubuntu.sh）"
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5927980Z   ],
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5928325Z   "docker_sock_gid": 112,
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5928743Z   "registry_mirrors": [],
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5929125Z   "git": {
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5929544Z     "user.name": "241250033",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5930113Z     "user.email": "52848497+mcjiansheng@users.noreply.github.com"
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5930648Z   }
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5930995Z }
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5931181Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.5931413Z 环境自检：通过
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7061537Z test_empty_broken_report_does_not_pass (test_e7_a_gate.OracleTests.test_empty_broken_report_does_not_pass) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7062800Z test_exact_errors_rejected_by_cli (test_e7_a_gate.OracleTests.test_exact_errors_rejected_by_cli) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7063466Z test_explicit_unsupported (test_e7_a_gate.OracleTests.test_explicit_unsupported) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7064009Z test_extra_finding_is_rejected (test_e7_a_gate.OracleTests.test_extra_finding_is_rejected) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7064570Z test_failed_build_not_counted_as_fixed (test_e7_a_gate.OracleTests.test_failed_build_not_counted_as_fixed) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7065065Z test_fixed_passes (test_e7_a_gate.OracleTests.test_fixed_passes) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7065549Z test_missing_evidence_is_rejected (test_e7_a_gate.OracleTests.test_missing_evidence_is_rejected) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7066202Z test_timeout_requires_failure_exit (test_e7_a_gate.OracleTests.test_timeout_requires_failure_exit) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7067153Z test_extra_finding_and_missing_evidence_are_rejected (test_e7_gate_rejections.RejectionTests.test_extra_finding_and_missing_evidence_are_rejected) ... ok
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7068411Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7068568Z ----------------------------------------------------------------------
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7069058Z Ran 9 tests in 0.001s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7069189Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.7069269Z OK
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:02.9007307Z 密钥检查：未发现问题（文件 124 个，含 Git 历史）
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.0103587Z #0 building with "default" instance using docker driver
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.0104012Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.0104146Z #1 [internal] load build definition from Dockerfile
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1234959Z #1 transferring dockerfile: 1.98kB done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1235447Z #1 DONE 0.0s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1235560Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1236007Z #2 [internal] load metadata for m.daocloud.io/docker.io/library/python:3.13-slim@sha256:f82c96458eedc847b233e582eb31336f4954b39cae020b6dcf5b3ed0e5cbcd74
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1236553Z #2 DONE 0.0s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1236667Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1236765Z #3 [internal] load .dockerignore
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1237007Z #3 transferring context: 106B done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1237359Z #3 DONE 0.0s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1237461Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1237576Z #4 [internal] load build context
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1237822Z #4 transferring context: 69.61kB done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1238054Z #4 DONE 0.0s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1238157Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1238495Z #5 [1/8] FROM m.daocloud.io/docker.io/library/python:3.13-slim@sha256:f82c96458eedc847b233e582eb31336f4954b39cae020b6dcf5b3ed0e5cbcd74
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1239222Z #5 resolve m.daocloud.io/docker.io/library/python:3.13-slim@sha256:f82c96458eedc847b233e582eb31336f4954b39cae020b6dcf5b3ed0e5cbcd74 0.0s done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1239710Z #5 DONE 0.0s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1239818Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1240517Z #6 [4/8] RUN python3 -m pip install       --index-url https://pypi.tuna.tsinghua.edu.cn/simple       --timeout 60 --retries 3       --no-cache-dir --require-hashes -r /tmp/requirements-dev.lock  && python3 -m pip freeze | sed 's/^/pip:/' >> /opt/toolchain.lock
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1241320Z #6 CACHED
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1241426Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1241572Z #7 [3/8] COPY requirements-dev.lock /tmp/requirements-dev.lock
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1241870Z #7 CACHED
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1241970Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1242160Z #8 [5/8] RUN useradd --create-home --uid 10001 app  && install -d -o app -g app /app
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1242488Z #8 CACHED
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1242588Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1248312Z #9 [2/8] RUN sed -i       -e 's|https\?://deb.debian.org/debian-security|https://mirrors.tuna.tsinghua.edu.cn/debian-security|g'       -e 's|https\?://security.debian.org/debian-security|https://mirrors.tuna.tsinghua.edu.cn/debian-security|g'       -e 's|https\?://deb.debian.org/debian|https://mirrors.tuna.tsinghua.edu.cn/debian|g'       /etc/apt/sources.list.d/debian.sources  && apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=3 update  && apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=3 install -y --no-install-recommends gcc make libc6-dev strace git  && rm -rf /var/lib/apt/lists/*  && dpkg-query -W -f='${Package}=${Version}\n' gcc make libc6-dev strace git > /opt/toolchain.lock  && echo "python3=$(python3 -c 'import platform; print(platform.python_version())')" >> /opt/toolchain.lock  && echo "arch=$(dpkg --print-architecture)" >> /opt/toolchain.lock
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1250686Z #9 CACHED
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.1250794Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2463846Z #10 [6/8] WORKDIR /app
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2464220Z #10 CACHED
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2464369Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2464547Z #11 [7/8] COPY --chown=app:app services/buildchecker/ /app/
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2464863Z #11 DONE 0.0s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2464979Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2465109Z #12 [8/8] COPY --chown=app:app fixtures/ /app/fixtures/
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2465406Z #12 DONE 0.0s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2465519Z 
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2465612Z #13 exporting to image
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.2465833Z #13 exporting layers 0.1s done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.3627681Z #13 exporting manifest sha256:1c39b95fc563d902a039ae1f0b0e14bf89478041e50db7e42f091a991d0b52a6 0.0s done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.3629213Z #13 exporting config sha256:bf62ae6e551b2250ddd783b17b12a049caacf9f872a43937633a7060b4c983c8 0.0s done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.3630223Z #13 exporting attestation manifest sha256:748a04eacd730f0fef4182ccf0890709444ca9fc1977db801503db23965433df 0.0s done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.3630856Z #13 exporting manifest list sha256:02424d4820247eb168f3b4e140a2bc4e1ef9ac2cc413f9c4063f964ca2760404 0.0s done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.3631388Z #13 naming to docker.io/library/e7-buildchecker:group-ci done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.3631769Z #13 unpacking to docker.io/library/e7-buildchecker:group-ci 0.0s done
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.3632077Z #13 DONE 0.2s
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.6834451Z 密钥检查：未发现问题（文件 124 个，含镜像 e7-buildchecker:group-ci）
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:03.7537901Z [unit-tests] Running existing service tests...
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5206564Z {
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5206960Z   "passed": false,
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5207311Z   "image": "e7-buildchecker:group-ci",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5207694Z   "cases": [
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5207995Z     {
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5208286Z       "case": "unit-tests",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5208596Z       "passed": false,
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5208935Z       "exit_code": 1
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5209227Z     },
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5209438Z     {
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5209627Z       "case": "runner",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5209835Z       "passed": false,
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5210056Z       "error": "Service unit tests failed"
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5210304Z     }
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5210475Z   ],
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5210784Z   "oracle_scope": "Small explicit teaching fixtures; not full paper benchmark",
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5211152Z   "repeated_original_cases": 3,
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5211393Z   "intentional_failure": false
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5211613Z }
+e7-a-quality-gate	Run all experiment checks on 60.204.240.40	2026-11-06T04:41:04.5440285Z ##[error]Process completed with exit code 1.

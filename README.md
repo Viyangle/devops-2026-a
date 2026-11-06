@@ -33,4 +33,4 @@ python3 scripts/lab_cloud.py gate --out work/e7-01
 
 | 姓名 | 学号 | 内容 | 实验结果 |
 |---|---|---|---|
-| 谢浩天 | 241250033 | [E7 源码、报告、证据及完整实验包](submissions/241250033/e7/README.md) | 个人实验为 8 / 17 / 8 项通过；公共入口新增测试与合并记录见 [集成记录](submissions/241250033/e7/INTEGRATION.md) |
+| 谢浩天 | 241250033 | [E7 源码、报告、证据及完整实验包](submissions/241250033/e7/README.md) | 公共入口 9 / 17 / 8 项通过；[PR #3](https://github.com/Viyangle/devops-2026-a/pull/3) 已合入 main，见 [集成记录](submissions/241250033/e7/INTEGRATION.md) |

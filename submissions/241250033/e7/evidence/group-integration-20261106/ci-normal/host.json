@@ -1,0 +1,8 @@
+{
+  "hostname": "devops",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+  "server": "60.204.240.40",
+  "repository": "Viyangle/devops-2026-a",
+  "run_id": "42163528751-2",
+  "execution": "SSH on A-group server"
+}

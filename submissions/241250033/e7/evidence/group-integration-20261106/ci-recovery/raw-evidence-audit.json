@@ -1,0 +1,74 @@
+{
+  "passed": true,
+  "trace_ids_unique": true,
+  "original_findings_exact": true,
+  "original_inputs_identical": true,
+  "fixed_changed_inputs": [
+    "Makefile"
+  ],
+  "anchors": [
+    {
+      "case": "original-1",
+      "type": "MISSING",
+      "file": "gate/original-1/evidence/trace/t.14",
+      "line": 579,
+      "text": "openat(AT_FDCWD, \"config.h\", O_RDONLY|O_NOCTTY) = 4"
+    },
+    {
+      "case": "original-1",
+      "type": "MISSING",
+      "file": "gate/original-1/evidence/trace/t.15",
+      "line": 23,
+      "text": "openat(AT_FDCWD, \"main.o\", O_RDWR|O_CREAT|O_TRUNC, 0666) = 3"
+    },
+    {
+      "case": "original-1",
+      "type": "REDUNDANT",
+      "file": "gate/original-1/evidence/make-db.txt",
+      "line": 1053,
+      "text": "main.o: main.c unused.h"
+    },
+    {
+      "case": "original-2",
+      "type": "MISSING",
+      "file": "gate/original-2/evidence/trace/t.14",
+      "line": 579,
+      "text": "openat(AT_FDCWD, \"config.h\", O_RDONLY|O_NOCTTY) = 4"
+    },
+    {
+      "case": "original-2",
+      "type": "MISSING",
+      "file": "gate/original-2/evidence/trace/t.15",
+      "line": 23,
+      "text": "openat(AT_FDCWD, \"main.o\", O_RDWR|O_CREAT|O_TRUNC, 0666) = 3"
+    },
+    {
+      "case": "original-2",
+      "type": "REDUNDANT",
+      "file": "gate/original-2/evidence/make-db.txt",
+      "line": 1053,
+      "text": "main.o: main.c unused.h"
+    },
+    {
+      "case": "original-3",
+      "type": "MISSING",
+      "file": "gate/original-3/evidence/trace/t.14",
+      "line": 579,
+      "text": "openat(AT_FDCWD, \"config.h\", O_RDONLY|O_NOCTTY) = 4"
+    },
+    {
+      "case": "original-3",
+      "type": "MISSING",
+      "file": "gate/original-3/evidence/trace/t.15",
+      "line": 23,
+      "text": "openat(AT_FDCWD, \"main.o\", O_RDWR|O_CREAT|O_TRUNC, 0666) = 3"
+    },
+    {
+      "case": "original-3",
+      "type": "REDUNDANT",
+      "file": "gate/original-3/evidence/make-db.txt",
+      "line": 1053,
+      "text": "main.o: main.c unused.h"
+    }
+  ]
+}

@@ -5,7 +5,7 @@
     "group": "A09"
   },
   "target_repository": "https://github.com/Viyangle/devops-2026-a",
-  "branch": "student/241250033/e7",
+  "branch": "main",
   "base_commit": "a90ef8ba134bc681ed302c23e61fadecab57a36c",
   "source_group_commit": "1f09a2ad7b8cabff9a87b388a2b2d6be2bb7dfd1",
   "execution_commit": "d2cbe210b2a90c34ebd10c360846314321d17d04",
@@ -16,5 +16,22 @@
   "gate_cases": 8,
   "archive": "E7_A_241250033_20261106.zip",
   "archive_sha256": "8f50a8d2d4fb96b4c037e02bde36bbe4db0dd3857ab63733453efb9c15976822",
-  "historical_evidence_repository": "https://github.com/mcjiansheng/devops-e7-a-241250033"
+  "historical_evidence_repository": "https://github.com/mcjiansheng/devops-e7-a-241250033",
+  "group_integration": {
+    "source_sha": "4e81e9c2713e220a25bcab294b58ad7a5673a899",
+    "merge_sha": "4f87c2452f3caaa51793f24a7e51a9da23d00ebe",
+    "pr": "https://github.com/Viyangle/devops-2026-a/pull/3",
+    "merged_at": "2026-11-06T04:44:35Z",
+    "oracle_tests": 9,
+    "service_tests": 17,
+    "gate_cases": 8,
+    "server": "60.204.240.40",
+    "ci_normal": 42163528751,
+    "normal_attempt": 2,
+    "ci_rejection": 42163931563,
+    "ci_recovery": 42164137207,
+    "archive": "E7_A_241250033_Group_20261106.zip",
+    "archive_sha256": "c121f4ee6b5f0b348bf356bbf5d9e3906ad7115197decb7b81a9d048318f13e2",
+    "archive_manifest_files": 575
+  }
 }

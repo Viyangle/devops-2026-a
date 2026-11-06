@@ -1,0 +1,61 @@
+[
+  {
+    "sha": "7608fca3703c9a9c670ee5b3e68bf468744ee692",
+    "parent": "68097d9a22cbbfc0f477d43b2fad4fe8bf47591b",
+    "tree": "ceae7bec3ee92dc15a0d05157ea0d3cfebb6a2e8",
+    "message": "Integrate 241250033 tests and execute E7 checks on A-group server",
+    "date": "2026-11-06T04:34:51+00:00",
+    "files": [
+      ".github/workflows/e7-quality-gate.yml",
+      "README.md",
+      "STATE.md",
+      "ci/server/e7-ci-dispatch.py",
+      "scripts/doctor.py",
+      "scripts/run_e7_server_ci.sh",
+      "services/buildchecker/Dockerfile",
+      "services/buildchecker/tests/test_fullcheck.py",
+      "submissions/241250033/e7/INTEGRATION.md",
+      "tests/e7/test_e7_a_gate.py"
+    ]
+  },
+  {
+    "sha": "627cd8f58c1241a17598808417832d0d4f822b61",
+    "parent": "7608fca3703c9a9c670ee5b3e68bf468744ee692",
+    "tree": "5f6c32892bd5139c5698e5b05aa18623a4045d7f",
+    "message": "Clean up this CI run containers after interruption or failure",
+    "date": "2026-11-06T04:36:06+00:00",
+    "files": [
+      ".github/workflows/e7-quality-gate.yml",
+      "README.md",
+      "STATE.md",
+      "ci/server/e7-ci-dispatch.py",
+      "scripts/doctor.py",
+      "scripts/run_e7_server_ci.sh",
+      "services/buildchecker/Dockerfile",
+      "services/buildchecker/tests/test_fullcheck.py",
+      "submissions/241250033/e7/INTEGRATION.md",
+      "tests/e7/test_e7_a_gate.py"
+    ]
+  },
+  {
+    "sha": "0a99f93a4198ef63e86ac9043f2fb612997f8b31",
+    "parent": "627cd8f58c1241a17598808417832d0d4f822b61",
+    "tree": "cbcdf0934fc9c8c3503494d0f7e8bc198fdafda5",
+    "message": "Demonstrate version oracle rejection for 241250033 on group server",
+    "date": "2026-11-06T04:40:46+00:00",
+    "files": [
+      "ci/server/README.md",
+      "services/buildchecker/tests/test_ci_reject_demo.py"
+    ]
+  },
+  {
+    "sha": "4e81e9c2713e220a25bcab294b58ad7a5673a899",
+    "parent": "0a99f93a4198ef63e86ac9043f2fb612997f8b31",
+    "tree": "ae0b2c4d7c93477a9191e4cccabf4fffaa7d4ef0",
+    "message": "Restore version success oracle after verified merge rejection",
+    "date": "2026-11-06T04:42:55+00:00",
+    "files": [
+      "services/buildchecker/tests/test_ci_reject_demo.py"
+    ]
+  }
+]
