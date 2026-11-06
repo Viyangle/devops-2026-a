@@ -1,0 +1,39 @@
+{
+  "server": "60.204.240.40",
+  "isolated_copy": "/tmp/e7-dispatch-validation-241250033/dispatch.py",
+  "timeout_override": "2s",
+  "source_sha": "2fa038c72021904519d8efb782b36e8bbb2b68f8",
+  "passed": true,
+  "results": [
+    {
+      "case": "running-container-timeout",
+      "exit_code": 124,
+      "seconds": 2.15,
+      "exit_record": {
+        "exit_code": 124,
+        "sha": "2fa038c72021904519d8efb782b36e8bbb2b68f8"
+      },
+      "started": true,
+      "cleanup": [
+        {
+          "container": "fa38b92139b8692eeff7c69332463d68f6e7910a363c12fb41827ca0224b31d8",
+          "exit_code": 0,
+          "stdout": "fa38b92139b8692eeff7c69332463d68f6e7910a363c12fb41827ca0224b31d8\n",
+          "stderr": ""
+        }
+      ],
+      "container_still_exists": false
+    },
+    {
+      "case": "lock-wait-timeout",
+      "exit_code": 124,
+      "seconds": 2.05,
+      "exit_record": {
+        "exit_code": 124,
+        "sha": "2fa038c72021904519d8efb782b36e8bbb2b68f8"
+      },
+      "started": false,
+      "cleanup": []
+    }
+  ]
+}

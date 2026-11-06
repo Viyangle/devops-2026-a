@@ -8,3 +8,10 @@ A,故障,构建失败、多输出、超时正确识别,8项gate全部passed=true
 共同,拒绝合并,OPEN/BLOCKED且合并退出1,OPEN/BLOCKED，退出1,evidence/241250033-20261106/ci-rejection/merge-rejection.log,PASS
 共同,恢复,同一PR最新检查通过,PR1，42153111254 success,evidence/241250033-20261106/ci-recovery/run.json,PASS
 共同,合并,MERGED及mergeCommit及mergedAt齐全,MERGED / 939c205 / 2026-11-06T02:56:01Z,evidence/241250033-20261106/ci-recovery/PR-merged.json,PASS
+小组集成,根目录个人测试,个人新增接入公共入口,oracle 9；服务17；gate8 全部通过,evidence/group-integration-20261106/ci-recovery/gate/gate-result.json,PASS
+小组集成,执行主机,所有实验检查在A组服务器,devops / 60.204.240.40 / e7ci,evidence/group-integration-20261106/ci-recovery/host.json,PASS
+小组集成,正常CI,通过且下载artifact,42163528751 attempt2 success,evidence/group-integration-20261106/ci-normal/run.json,PASS
+小组集成,错误测试与拒绝,CI失败且普通合并被拒,1 failed / 16 passed；OPEN/BLOCKED；merge exit1,evidence/group-integration-20261106/ci-rejection/PR.json,PASS
+小组集成,恢复,同一PR最新源码通过,42164137207 success；4e81e9c,evidence/group-integration-20261106/ci-recovery/run.json,PASS
+小组集成,合入main,MERGED和mergeCommit及mergedAt齐全,MERGED / 4f87c2452f3caaa51793f24a7e51a9da23d00ebe / 2026-11-06T04:44:35Z,evidence/group-integration-20261106/ci-recovery/PR-merged.json,PASS
+小组集成,调度超时,外层超时清理本次容器且锁等待有界,两项均exit124；容器已删除；等待时未启动脚本,evidence/group-integration-20261106/dispatch-validation.json,PASS

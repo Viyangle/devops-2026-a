@@ -1,0 +1,8 @@
+[
+  {
+    "container": "c80f5af7272a96884b71b08ebeab0379be68f1b0042e0edc6b457cd1770a498d",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "Error response from daemon: No such container: c80f5af7272a96884b71b08ebeab0379be68f1b0042e0edc6b457cd1770a498d\n"
+  }
+]
