@@ -8,8 +8,8 @@
 
 | 路径 | 内容 |
 |---|---|
-| `services/buildchecker/` | BuildChecker 实现（`fullcheck.py`、`cli.py`）与 16 项服务测试 |
-| `tests/e7/` | 7 项独立判定测试（含新增的拒绝规则测试） |
+| `services/buildchecker/` | BuildChecker 实现（`fullcheck.py`、`cli.py`）与 17 项服务测试 |
+| `tests/e7/` | 9 项独立判定测试（含新增的拒绝规则测试） |
 | `scripts/` | `lab_cloud.py` 入口、`run_e7_a_gate.py` 门禁、`secret_scan.py`、`doctor.py` |
 | `fixtures/md-rd/` | 教学用最小 MD/RD 输入工程 |
 | `ci/` | main 分支保护配置与"拒绝合并"演示测试 |
@@ -27,10 +27,10 @@ python3 scripts/lab_cloud.py gate --out work/e7-01
 
 ## CI
 
-`.github/workflows/e7-a-quality-gate.yml`：push 与 pull_request 都触发，运行八项门禁并把 `work/ci/` 归档为 artifact；main 已设必需检查（strict + enforce_admins），只能通过 PR 合并。
+`.github/workflows/e7-quality-gate.yml`：main push、面向 main 的 PR 与手动触发均运行。GitHub 托管 runner 负责检出精确 SHA、传输完整 Git bundle 和上传 artifact；语法检查、判定测试、源码及历史扫描、镜像构建和八项门禁在 A 组服务器 `60.204.240.40` 执行。`work/ci/` 保存主机、环境、源码 SHA 与完整场景证据。main 保留必需检查 `e7-a-quality-gate`，通过 PR 合并。
 
 ## 个人实验提交
 
 | 姓名 | 学号 | 内容 | 实验结果 |
 |---|---|---|---|
-| 谢浩天 | 241250033 | [E7 源码、报告、证据及完整实验包](submissions/241250033/e7/README.md) | 判定测试 8 项、服务测试 17 项、门禁 8 项通过；同一 PR 完成拒绝、恢复和合并 |
+| 谢浩天 | 241250033 | [E7 源码、报告、证据及完整实验包](submissions/241250033/e7/README.md) | 个人实验为 8 / 17 / 8 项通过；公共入口新增测试与合并记录见 [集成记录](submissions/241250033/e7/INTEGRATION.md) |

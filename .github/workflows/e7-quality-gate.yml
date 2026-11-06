@@ -2,7 +2,9 @@ name: E7 A quality gate
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       fail_demo:
@@ -13,61 +15,68 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: e7-a-devops-server
+  cancel-in-progress: false
+
 jobs:
   quality-gate:
     name: e7-a-quality-gate
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      IMAGE: e7-buildchecker:ci
-      FAIL_DEMO: ${{ inputs.fail_demo }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      E7_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - name: Check out the exact triggering revision
+      - name: Reject external PRs before accessing the course server
+        env:
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          CURRENT_REPO: ${{ github.repository }}
+        run: |
+          if [[ -n "$PR_HEAD_REPO" && "$PR_HEAD_REPO" != "$CURRENT_REPO" ]]; then
+            echo "The course server accepts branches in $CURRENT_REPO."
+            exit 1
+          fi
+
+      - name: Check out the exact triggering revision and history
         uses: actions/checkout@v7.0.1
         with:
+          ref: ${{ env.SOURCE_SHA }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Prepare evidence and check Python syntax
-        shell: bash
+      - name: Prepare server connection
+        id: ssh
+        env:
+          E7_SSH_KEY: ${{ secrets.E7_A_SERVER_SSH_KEY }}
+          E7_HOST_KEYS: ${{ secrets.E7_A_SERVER_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
-          mkdir -p work/ci
-          git rev-parse HEAD > work/ci/commit.txt
-          docker version > work/ci/docker-version.txt
-          python3 -m compileall -q services/buildchecker/buildchecker scripts tests/e7
+          umask 077
+          printf '%s\n' "${E7_SSH_KEY:?Missing E7_A_SERVER_SSH_KEY}" > "$RUNNER_TEMP/e7_ci_key"
+          printf '%s\n' "${E7_HOST_KEYS:?Missing E7_A_SERVER_KNOWN_HOSTS}" > "$RUNNER_TEMP/e7_known_hosts"
 
-      - name: Test the independent oracle
-        run: python3 -m unittest discover -s tests/e7 -v
-
-      - name: Scan tracked sources and Git history
-        shell: bash
+      - name: Run all experiment checks on 60.204.240.40
+        env:
+          FAIL_DEMO: ${{ inputs.fail_demo || 'false' }}
         run: |
           set -euo pipefail
-          python3 scripts/secret_scan.py . --history 2>&1 | tee work/ci/source-scan.log
+          git branch e7-ci "$SOURCE_SHA"
+          git bundle create "$RUNNER_TEMP/e7-source.bundle" --all
+          ssh -i "$RUNNER_TEMP/e7_ci_key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/e7_known_hosts" \
+            -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
+            e7ci@60.204.240.40 "run $E7_RUN_ID $SOURCE_SHA $FAIL_DEMO" < "$RUNNER_TEMP/e7-source.bundle"
 
-      - name: Build the service image
-        shell: bash
+      - name: Retrieve server evidence even when checks fail
+        if: always() && steps.ssh.outcome == 'success'
         run: |
           set -euo pipefail
-          docker build --progress=plain -f services/buildchecker/Dockerfile -t "$IMAGE" . 2>&1 | tee work/ci/build.log
-          docker image inspect "$IMAGE" > work/ci/service-image-inspect.json
-
-      - name: Scan built image
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/secret_scan.py . --image "$IMAGE" 2>&1 | tee work/ci/image-scan.log
-
-      - name: Run the real component and fault gate
-        shell: bash
-        run: |
-          set -euo pipefail
-          args=()
-          if [[ "$FAIL_DEMO" == "true" ]]; then
-            args+=(--inject-bad-oracle)
-          fi
-          python3 scripts/run_e7_a_gate.py --image "$IMAGE" --out work/ci/gate "${args[@]}" 2>&1 | tee work/ci/gate-console.log
+          ssh -i "$RUNNER_TEMP/e7_ci_key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/e7_known_hosts" \
+            -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
+            e7ci@60.204.240.40 "fetch $E7_RUN_ID $SOURCE_SHA" > "$RUNNER_TEMP/e7-evidence.tar.gz"
+          tar -xzf "$RUNNER_TEMP/e7-evidence.tar.gz"
 
       - name: Archive evidence even when checks fail
         if: always()
@@ -78,3 +87,7 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Remove connection files
+        if: always()
+        run: rm -f "$RUNNER_TEMP/e7_ci_key" "$RUNNER_TEMP/e7_known_hosts"
