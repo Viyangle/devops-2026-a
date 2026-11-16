@@ -130,4 +130,108 @@ class StudentE10A241250014(unittest.TestCase):
         self.assertEqual(len(rows),5)
 
 
+class StudentE8A241250033(unittest.TestCase):
+    """E8 A (241250033)：仅补齐声明时复用真实依赖图，消除 MISSING config.h 且保留 REDUNDANT unused.h。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.p = Path(self.tmp.name) / 'e8a-241250033'
+        fixture(self.p)
+
+    def test_declaration_only_change_reuses_actual_graph_and_resolves_md(self):
+        old = scan(self.p)
+        mf = self.p / 'Makefile'
+        mf.write_text(mf.read_text().replace('main.c unused.h', 'main.c unused.h config.h'))
+        commit(self.p, '241250033: add missing config.h declaration')
+        result = scan(self.p, old)
+        full = scan(self.p)
+        self.assertEqual(result['actual'], old['actual'])
+        self.assertEqual(result['reused'], ['main.o', 'helper.o'])
+        self.assertEqual(result['refreshed'], [])
+        self.assertEqual(result['resolved'], [['MISSING', 'main.o', 'config.h']])
+        self.assertEqual(result['added'], [])
+        self.assertEqual(result['findings'], [{'type': 'REDUNDANT', 'target': 'main.o', 'dependency': 'unused.h'}])
+        self.assertEqual(result['actual'], full['actual'])
+        self.assertEqual(result['declared'], full['declared'])
+        self.assertEqual(result['findings'], full['findings'])
+
+
+class StudentE9A241250033(unittest.TestCase):
+    """E9 A (241250033)：头文件新增 include 触发刷新，随后移除并转移到 helper.c 验证消除与新增集合。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.p = Path(self.tmp.name) / 'e9a-241250033'
+        fixture(self.p)
+
+    def test_header_directive_addition_and_removal_across_commits(self):
+        old = scan(self.p)
+        (self.p / 'config.h').write_text('#include "extra.h"\n#define VALUE 1\n')
+        commit(self.p, '241250033: config.h includes extra.h')
+        r1 = scan(self.p, old)
+        full1 = scan(self.p)
+        self.assertEqual(r1['refreshed'], ['main.o', 'helper.o'])
+        self.assertEqual(r1['reused'], [])
+        self.assertEqual(r1['actual']['main.o'], ['config.h', 'extra.h', 'main.c'])
+        self.assertEqual(r1['added'], [['MISSING', 'main.o', 'extra.h']])
+        self.assertEqual(r1['resolved'], [])
+        self.assertEqual(r1['actual'], full1['actual'])
+        self.assertEqual(r1['findings'], full1['findings'])
+
+        (self.p / 'config.h').write_text('#define VALUE 1\n')
+        (self.p / 'helper.c').write_text('#include "extra.h"\nint helper(void){return 0;}\n')
+        commit(self.p, '241250033: move extra.h include from config.h to helper.c')
+        r2 = scan(self.p, r1)
+        full2 = scan(self.p)
+        self.assertEqual(r2['refreshed'], ['main.o', 'helper.o'])
+        self.assertEqual(r2['reused'], [])
+        self.assertEqual(r2['actual']['main.o'], ['config.h', 'main.c'])
+        self.assertEqual(r2['actual']['helper.o'], ['extra.h', 'helper.c'])
+        self.assertEqual(r2['resolved'], [['MISSING', 'main.o', 'extra.h']])
+        self.assertEqual(r2['added'], [['MISSING', 'helper.o', 'extra.h']])
+        self.assertEqual(r2['actual'], full2['actual'])
+        self.assertEqual(r2['declared'], full2['declared'])
+        self.assertEqual(r2['findings'], full2['findings'])
+
+
+class StudentE10A241250033(unittest.TestCase):
+    """E10 A (241250033)：三层传递包含（config.h -> extra.h -> leaf.h）五次重复增量/全量一致性与复用。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.p = Path(self.tmp.name) / 'e10a-241250033'
+        fixture(self.p)
+
+    def test_transitive_include_five_repeats_consistency_and_reuse(self):
+        previous = scan(self.p)
+        (self.p / 'config.h').write_text('#include "extra.h"\n#define VALUE 1\n')
+        (self.p / 'extra.h').write_text('#include "leaf.h"\n#define EXTRA 0\n')
+        (self.p / 'leaf.h').write_text('#define LEAF 7\n')
+        commit(self.p, '241250033: three-level transitive include')
+        for repeat in range(1, 6):
+            inc = scan(self.p, previous)
+            full = scan(self.p)
+            self.assertEqual(inc['actual'], full['actual'])
+            self.assertEqual(inc['declared'], full['declared'])
+            self.assertEqual(inc['findings'], full['findings'])
+            self.assertEqual(inc['actual']['main.o'], ['config.h', 'extra.h', 'leaf.h', 'main.c'])
+            missing = {x['dependency'] for x in inc['findings'] if x['type'] == 'MISSING'}
+            self.assertEqual(missing, {'config.h', 'extra.h', 'leaf.h'})
+            redundant = {x['dependency'] for x in inc['findings'] if x['type'] == 'REDUNDANT'}
+            self.assertEqual(redundant, {'unused.h'})
+            if repeat == 1:
+                self.assertEqual(inc['refreshed'], ['main.o', 'helper.o'])
+                self.assertEqual(inc['reused'], [])
+                self.assertEqual(sorted(inc['added']), [['MISSING', 'main.o', 'extra.h'], ['MISSING', 'main.o', 'leaf.h']])
+            else:
+                self.assertEqual(inc['reused'], ['main.o', 'helper.o'])
+                self.assertEqual(inc['refreshed'], [])
+                self.assertEqual(inc['added'], [])
+                self.assertEqual(inc['resolved'], [])
+            previous = inc
+
+
 if __name__=='__main__':unittest.main()
