@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 from pathlib import Path
 import tempfile
 import threading
@@ -16,7 +17,7 @@ import server
 class JobApiTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.root = Path(self.temporary.name)
+        self.root = Path(self.temporary.name).resolve()
         self.store = server.Store(self.root / 'jobs')
         self.addCleanup(self.temporary.cleanup)
         self.addCleanup(self.store.pool.shutdown)
@@ -61,6 +62,22 @@ class JobApiTests(unittest.TestCase):
         folder = self.store.root / state['job_id'] / 'evidence'
         result = json.loads((folder / 'result.json').read_text())
         return state, result['stages'][0]['artifact']
+
+    def test_relative_store_passes_absolute_evidence_path_to_worker(self):
+        relative = os.path.relpath(self.root / "relative-jobs", Path.cwd())
+        store = server.Store(relative)
+        self.addCleanup(store.pool.shutdown)
+        with patch.object(server, "execute", return_value={"status": "SUCCEEDED"}) as execute:
+            state = store.submit(self.request(), "relative")
+            store.pool.submit(lambda: None).result(timeout=5)
+        self.assertEqual(execute.call_args.args[1], self.root / "relative-jobs" / state["job_id"] / "evidence")
+
+    def test_repair_cannot_override_the_original_report_hash(self):
+        _, reference = self.completed_source()
+        changed = dict(reference, sha256="0" * 64)
+        request = dict(self.request("e12-repair"), input_report=changed)
+        with self.assertRaisesRegex(server.RequestError, "ARTIFACT_HASH_MISMATCH"):
+            self.store.submit(request, "bad-sha")
 
     def test_trace_id_is_available_while_queued_and_stays_the_same(self):
         started = threading.Event()

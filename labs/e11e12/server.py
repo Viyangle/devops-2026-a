@@ -22,7 +22,7 @@ class RequestError(ValueError):
 
 class Store:
     def __init__(self, root):
-        self.root = Path(root)
+        self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self.lock = threading.Lock()
         self.pool = ThreadPoolExecutor(max_workers=1)
