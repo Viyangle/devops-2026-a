@@ -1,5 +1,5 @@
 """E8-E10 teaching profile: explicit C/Make rules, GCC dependency observation."""
-import argparse, csv, difflib, json, re, shutil, subprocess, time
+import argparse, csv, difflib, json, os, re, shutil, subprocess, time
 from pathlib import Path
 
 def save(p, data):
@@ -31,11 +31,11 @@ def commit(p, msg):
     run(['git','add','.'],p); run(['git','commit','-m',msg],p)
     return run(['git','rev-parse','HEAD'],p).strip()
 
-def declarations(p):
+def declarations(p, targets=None):
     text=(p/'Makefile').read_text()
     variables=dict(re.findall(r'^(\w+)\s*=\s*(.*)$',text,re.M))
     graph={}
-    for target in ['main.o','helper.o']:
+    for target in targets if targets is not None else ['main.o','helper.o']:
         m=re.search(r'^'+re.escape(target)+r': ([^\n]*)$',text,re.M)
         if not m: raise ValueError('UNSUPPORTED_RULE '+target)
         dep=m[1]
@@ -45,20 +45,26 @@ def declarations(p):
         graph[target]=sorted(set(dep.split()))
     return graph,variables.get('CFLAGS','')
 
-def scan(p, old=None):
-    start=time.perf_counter(); declared,flags=declarations(p)
-    if flags not in ['-O0','-O1','-O0 -DMODE=1']: raise ValueError('UNSUPPORTED_FLAGS')
+def scan(p, old=None, *, targets=None, compiler_flags=None):
+    start=time.perf_counter(); declared,flags=declarations(p, targets)
+    if compiler_flags is None:
+        if flags not in ['-O0','-O1','-O0 -DMODE=1']: raise ValueError('UNSUPPORTED_FLAGS')
+        arguments=flags.split()
+    else:
+        arguments=list(compiler_flags)
+        flags=arguments
     # Conservative invalidation: all local preprocessor lines, source set and recipes.
     files={x.name:x.read_text() for x in sorted(p.glob('*')) if x.suffix in ['.c','.h']}
     key={'directives':{n:[l for l in t.splitlines() if l.lstrip().startswith('#')] for n,t in files.items()},
          'recipes':[l for l in (p/'Makefile').read_text().splitlines() if l.startswith('\t')],
          'flags':flags,'compiler':run(['gcc','--version'],p).splitlines()[0]}
+    if targets is not None: key['targets']=dict(targets)
     actual={}; refreshed=[]; reused=[]
-    for target,source in [('main.o','main.c'),('helper.o','helper.c')]:
+    for target,source in (targets.items() if targets is not None else [('main.o','main.c'),('helper.o','helper.c')]):
         if old and old['key']==key and target in old['actual']:
             actual[target]=old['actual'][target]; reused.append(target)
         else:
-            output=run(['gcc',*flags.split(),'-MM','-MT',target,source],p)
+            output=run(['gcc',*arguments,'-MM','-MT',target,source],p)
             actual[target]=sorted(set(output.replace('\\\n',' ').split(':',1)[1].split()))
             refreshed.append(target)
     findings=[]
@@ -94,7 +100,8 @@ def patch(p,report):
     diff=''.join(difflib.unified_diff(original.splitlines(True),changed.splitlines(True),fromfile='a/Makefile',tofile='b/Makefile'))
     return diff,edits
 
-def validate(p, patchfile, evidence, fail_test=False):
+def validate(p, patchfile, evidence, fail_test=False, *, targets=None, compiler_flags=None,
+             build_target='app', expected_output='1', rebuild_header=None):
     evidence.mkdir(parents=True); before=(p/'Makefile').read_bytes()
     sandbox=evidence/'sandbox'; shutil.copytree(p,sandbox,ignore=shutil.ignore_patterns('.git','*.o','app'))
     run(['git','init','-b','main'],sandbox)
@@ -105,13 +112,27 @@ def validate(p, patchfile, evidence, fail_test=False):
     try:
         run(['git','apply','--check',str(patchfile.resolve())],sandbox); checks['patch_applies']=True
         run(['git','apply',str(patchfile.resolve())],sandbox)
-        log=run(['make','clean'],sandbox)+run(['make','app'],sandbox);(evidence/'build.log').write_text(log);checks['build']=True
-        output=run(['./app'],sandbox).strip(); checks['test']=output==('99' if fail_test else '1')
+        log=run(['make','clean'],sandbox)+run(['make',build_target],sandbox);(evidence/'build.log').write_text(log);checks['build']=True
+        output=run(['./'+build_target],sandbox).strip()
+        (evidence/'test.log').write_text(output+'\n')
+        wanted='99' if fail_test else expected_output
+        checks['test']=output==wanted if rebuild_header is None else output.splitlines()[-1:]==[wanted]
         # Real header-change build checks the originally broken incremental behavior.
-        time.sleep(1.05); (sandbox/'config.h').write_text('#define VALUE 2\n')
-        (evidence/'incremental.log').write_text(run(['make','app'],sandbox))
-        checks['header_change']=run(['./app'],sandbox).strip()=='2'
-        recheck=scan(sandbox); save(evidence/'recheck.json',recheck)
+        before_build=(sandbox/build_target).stat().st_mtime_ns
+        time.sleep(1.05)
+        if rebuild_header is None:
+            (sandbox/'config.h').write_text('#define VALUE 2\n')
+        else:
+            os.utime(sandbox/rebuild_header, None)
+        (evidence/'incremental.log').write_text(run(['make',build_target],sandbox))
+        incremental_output=run(['./'+build_target],sandbox).strip()
+        (evidence/'incremental-test.log').write_text(incremental_output+'\n')
+        if rebuild_header is None:
+            checks['header_change']=incremental_output=='2'
+        else:
+            checks['header_change']=(sandbox/build_target).stat().st_mtime_ns>before_build
+            checks['header_test']=incremental_output.splitlines()[-1:]==[expected_output]
+        recheck=scan(sandbox,targets=targets,compiler_flags=compiler_flags); save(evidence/'recheck.json',recheck)
         checks['no_missing']=not any(f['type']=='MISSING' for f in recheck['findings'])
     except (ValueError,subprocess.TimeoutExpired) as ex: error=str(ex)
     accepted=bool(checks) and all(checks.values()) and error is None

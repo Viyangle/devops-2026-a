@@ -1,0 +1,59 @@
+name: E11-E12 integration
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  integration:
+    name: e11e12-integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the course image
+        run: |
+          git config --local user.name 999999999
+          git config --local user.email ci@example.invalid
+          mkdir -p work
+          python3 run_e11e12.py build --base-image python:3.13-slim@sha256:f82c96458eedc847b233e582eb31336f4954b39cae020b6dcf5b3ed0e5cbcd74 2>&1 | tee work/build.log
+      - name: Contract tests and classroom cases
+        run: |
+          python3 run_e11e12.py test 2>&1 | tee work/contracts.log
+          python3 run_e11e12.py prepare
+          for mode in e11-a e11-a-reuse e11-b e12; do
+            python3 run_e11e12.py run --request "data/integration-sample/$mode.json" --out "work/ci-$mode" > "work/$mode.log" 2>&1
+          done
+          if python3 run_e11e12.py run --request data/integration-sample/stale-report.json --out work/ci-stale > work/stale.log 2>&1; then
+            exit 1
+          fi
+          python3 -c "import json; r = json.load(open('work/ci-stale/result.json')); assert r['error']['code'] == 'STALE_REPORT' and not r['stages'], r"
+      - name: External SDS history and native repair
+        run: |
+          git clone https://github.com/antirez/sds.git data/sds
+          python3 run_e11e12.py prepare-sds
+          for mode in e12 e11-a-upstream-fix; do
+            python3 run_e11e12.py run --request "data/sds-input/$mode.json" --out "work/sds-$mode" > "work/sds-$mode.log" 2>&1
+          done
+          cp data/sds-input/dataset.json work/sds-dataset.json
+      - name: Exercise the live task API and A-to-B handoff
+        run: |
+          python3 run_e11e12.py serve > work/api-server.log 2>&1 &
+          api=$!
+          trap 'kill "$api" 2>/dev/null || true' EXIT
+          curl --retry 30 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8080/health
+          python3 labs/e11e12/api_smoke.py --request data/integration-sample/e12.json --out work/api-client
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: e11e12-evidence-${{ github.run_id }}
+          path: work/
+          retention-days: 14
