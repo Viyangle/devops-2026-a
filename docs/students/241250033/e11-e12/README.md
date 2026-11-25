@@ -15,7 +15,7 @@ python3 run_e11e12.py run --request data/integration-sample/e11-b.json --out wor
 python3 run_e11e12.py run --request data/integration-sample/e12.json --out work/e12
 ```
 
-`prepare` 保留已有样例。重复实验时给 `--out` 换一个目录。默认基础镜像沿用本组 E8–E10 配置，GitHub Actions 通过 `--base-image` 选用同摘要的 Docker Hub 镜像。
+`prepare` 保留已有样例。重复实验时给 `--out` 换一个目录。镜像固定 Python 3.13 基础摘要，从 Debian 官方源安装构建和跟踪工具。
 
 ## SDS 外部仓库
 

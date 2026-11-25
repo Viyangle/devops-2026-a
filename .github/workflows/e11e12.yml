@@ -24,7 +24,7 @@ jobs:
           git config --local user.name 999999999
           git config --local user.email ci@example.invalid
           mkdir -p work
-          python3 run_e11e12.py build --base-image python:3.13-slim@sha256:f82c96458eedc847b233e582eb31336f4954b39cae020b6dcf5b3ed0e5cbcd74 2>&1 | tee work/build.log
+          python3 run_e11e12.py build 2>&1 | tee work/build.log
       - name: Contract tests and classroom cases
         run: |
           python3 run_e11e12.py test 2>&1 | tee work/contracts.log

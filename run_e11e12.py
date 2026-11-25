@@ -7,7 +7,6 @@ import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parent
-ENVIRONMENT = ROOT / "labs/e8e10/environment"
 
 
 def main():
@@ -29,14 +28,9 @@ def main():
     print(f"IMAGE={image}", flush=True)
 
     if args.stage == "build":
-        toolchain = f"{image}-toolchain"
         base = ["--build-arg", f"BASE_IMAGE={args.base_image}"] if args.base_image else []
-        subprocess.run(
-            ["docker", "build", *base, "-f", str(ENVIRONMENT / "services/buildchecker/Dockerfile"),
-             "-t", toolchain, str(ENVIRONMENT)], cwd=ROOT, check=True,
-        )
         return subprocess.call(
-            ["docker", "build", "--build-arg", f"LAB_IMAGE={toolchain}",
+            ["docker", "build", "--progress=plain", *base,
              "-f", "labs/e11e12/Dockerfile", "-t", image, "labs/e11e12"], cwd=ROOT,
         )
 
