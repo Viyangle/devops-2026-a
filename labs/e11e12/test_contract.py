@@ -1,4 +1,6 @@
 import copy
+import hashlib
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -19,6 +21,24 @@ class Contracts(unittest.TestCase):
         with self.assertRaises(pipeline.Failure):pipeline.check_envelope(r,'a'*40)
     def test_reject_wrong_artifact_kind(self):
         with self.assertRaises(pipeline.Failure):pipeline.check_envelope(self.report(),'a'*40,'fixed-md')
+    def test_execute_rejects_report_for_another_target(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);(root/'repo').mkdir()
+            report={'schema_version':'e11e12-1','kind':'incremental-check','commit':'b'*40,
+                    'status':'SUCCEEDED','data':{'commit':'b'*40,'findings':[]}}
+            data=json.dumps(report).encode()
+            source=root/'source.json';source.write_bytes(data)
+            request={'mode':'e12-repair','repo':str(root/'repo'),'base':'a'*40,'target':'c'*40,
+                     'candidate':str(root/'candidate.Dockerfile'),
+                     'input_report':{'uri':'artifact://job-'+'0'*32+'/incremental-check.json',
+                                     'sha256':hashlib.sha256(data).hexdigest()}}
+            def snapshot(repo,revision,dest,logs):
+                dest.mkdir(parents=True,exist_ok=True);return revision
+            with patch.object(pipeline,'snapshot',side_effect=snapshot),patch.object(pipeline,'validate_project'):
+                result=pipeline.execute(request,root/'out','job-'+'0'*32,trace_id='trace-1',source_report=source)
+            self.assertEqual(result['status'],'FAILED')
+            self.assertEqual(result['error']['code'],'STALE_REPORT')
+            self.assertEqual(result['stages'],[])
     def test_artifact_uses_relative_uri_and_content_hash(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);p=root/'x.json';p.write_text('{}')
