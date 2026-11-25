@@ -1,11 +1,19 @@
 """Generate the reproducible classroom requests in a fresh workspace."""
+import os
+import shlex
+
 from pipeline import ROOT, save
 from lab import commit, fixture, scan
 
-BASE_IMAGE = "python:3.13-slim"
-CANDIDATE_BASE = BASE_IMAGE + "@sha256:70729b46c69b4f1e97c4822c1af3df53a1476cf5ddc6c087c0c10bc3a5678c2f"
+CANDIDATE_BASE = os.environ.get(
+    "COURSE_DRAFT_IMAGE",
+    "python:3.13-slim@sha256:70729b46c69b4f1e97c4822c1af3df53a1476cf5ddc6c087c0c10bc3a5678c2f",
+)
+BASE_IMAGE = CANDIDATE_BASE.split("@", 1)[0]
+DEBIAN_ORIGIN = os.environ.get("COURSE_DEBIAN_ORIGIN", "https://deb.debian.org").rstrip("/")
+SOURCE_SUBSTITUTION = shlex.quote(f"s|https?://deb.debian.org|{DEBIAN_ORIGIN}|g")
 INSTALL = (
-    "RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources"
+    f"RUN sed -Ei {SOURCE_SUBSTITUTION} /etc/apt/sources.list.d/debian.sources"
     " && apt-get -o APT::Update::Error-Mode=any update"
     " && apt-get install -y --no-install-recommends build-essential git strace"
     " && rm -rf /var/lib/apt/lists/*"
@@ -50,6 +58,7 @@ def main():
     save(root / "dataset.json", {
         "source": "course-generated", "base_commit": base, "target_commit": target,
         "body_commit": body_commit, "candidate_source": "course Dockerfile with build and trace tools",
+        "draft_image": CANDIDATE_BASE, "debian_origin": DEBIAN_ORIGIN,
     })
     print(root)
 

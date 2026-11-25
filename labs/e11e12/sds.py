@@ -14,7 +14,6 @@ BASE_COMMIT = "fb463145c9c245636feb28b5aac0fc897e16f67e"
 TARGET_COMMIT = "a9a03bb3304030bb8a93823a9aeb03c157831ba9"
 FIX_COMMIT = "9cbfaf54d13bfc17d6dd2e7b88a2bb5f0cd2b03b"
 DOCKERFILE_BROKEN = (
-    "FROM python:3.13-slim\n"
     "WORKDIR /work\n"
     "COPY sds.c sds.h sdsalloc.h testhelp.h Makefile ./\n"
     "RUN make sds-test\n"
@@ -22,8 +21,12 @@ DOCKERFILE_BROKEN = (
 )
 
 
+def dockerfile(base_image="python:3.13-slim"):
+    return f"FROM {base_image}\n{DOCKERFILE_BROKEN}"
+
+
 def write_requests(repo, output):
-    from prepare import BASE_IMAGE, CANDIDATE_BASE, INSTALL
+    from prepare import BASE_IMAGE, CANDIDATE_BASE, DEBIAN_ORIGIN, INSTALL
 
     repo = Path(repo).resolve()
     output = Path(output).resolve()
@@ -32,12 +35,12 @@ def write_requests(repo, output):
                        check=True, capture_output=True, text=True)
     output.mkdir(parents=True, exist_ok=True)
     candidate = output / "candidate.Dockerfile"
-    text = DOCKERFILE_BROKEN.replace("FROM " + BASE_IMAGE, "FROM " + CANDIDATE_BASE, 1)
+    text = dockerfile(CANDIDATE_BASE)
     candidate.write_text(text.replace("RUN make sds-test", INSTALL + "\nRUN make sds-test", 1), encoding="utf-8")
     request = {
         "mode": "e12", "profile": "sds", "repo": str(repo), "base": BASE_COMMIT,
         "target": TARGET_COMMIT, "candidate": str(candidate),
-        "expected_output": EXPECTED_OUTPUT, "build_timeout": 600,
+        "expected_output": EXPECTED_OUTPUT, "build_timeout": 600, "draft_base": BASE_IMAGE,
     }
     records = {
         "e12.json": request,
@@ -54,6 +57,7 @@ def write_requests(repo, output):
             "expected_missing_dependency": {"target": BUILD_TARGET, "dependency": HEADER},
             "expected_output": EXPECTED_OUTPUT,
             "candidate_source": "Course dependency-install candidate adapted to native SDS build and test commands",
+            "draft_image": CANDIDATE_BASE, "debian_origin": DEBIAN_ORIGIN,
         },
     }
     for name, data in records.items():

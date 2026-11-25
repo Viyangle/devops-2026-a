@@ -17,6 +17,10 @@ python3 run_e11e12.py run --request data/integration-sample/e12.json --out work/
 
 `prepare` 保留已有样例。重复实验时给 `--out` 换一个目录。镜像固定 Python 3.13 基础摘要，从 Debian 官方源安装构建和跟踪工具。
 
+## 课程服务器的镜像源
+
+如果服务器只能通过镜像源拉取，构建前用 `COURSE_BASE_IMAGE`、`COURSE_DOCKER_CLI_IMAGE` 和 `COURSE_DRAFT_IMAGE` 指定可访问的带摘要引用。前两个分别用于编排器的 Python 和 Docker CLI，第三个用于课堂样例与 SDS 的 DRAFT 候选。用 `COURSE_DEBIAN_ORIGIN` 指定同时提供 `/debian` 和 `/debian-security` 的 Debian 镜像站。样例生成时会把 DRAFT 镜像和 Debian 源写进候选与数据清单。已有样例继续使用其保存的候选。
+
 ## SDS 外部仓库
 
 ```bash

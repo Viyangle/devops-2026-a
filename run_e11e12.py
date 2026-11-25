@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--request", type=Path)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--port", type=int, default=8080)
-    parser.add_argument("--base-image")
+    parser.add_argument("--base-image", default=os.environ.get("COURSE_BASE_IMAGE"))
     args = parser.parse_args()
 
     student = subprocess.run(
@@ -28,9 +28,16 @@ def main():
     print(f"IMAGE={image}", flush=True)
 
     if args.stage == "build":
-        base = ["--build-arg", f"BASE_IMAGE={args.base_image}"] if args.base_image else []
+        build_args = []
+        for name, value in {
+            "BASE_IMAGE": args.base_image,
+            "DOCKER_CLI_IMAGE": os.environ.get("COURSE_DOCKER_CLI_IMAGE"),
+            "DEBIAN_ORIGIN": os.environ.get("COURSE_DEBIAN_ORIGIN"),
+        }.items():
+            if value:
+                build_args.extend(["--build-arg", f"{name}={value}"])
         return subprocess.call(
-            ["docker", "build", "--progress=plain", *base,
+            ["docker", "build", "--progress=plain", *build_args,
              "-f", "labs/e11e12/Dockerfile", "-t", image, "labs/e11e12"], cwd=ROOT,
         )
 
@@ -53,6 +60,10 @@ def main():
         docker += ["--group-add", str(sock.stat().st_gid), "-v", f"{sock}:{sock}"]
     if args.stage == "serve":
         docker += ["--init", "-p", f"127.0.0.1:{args.port}:8080"]
+    if args.stage in ("prepare", "prepare-sds"):
+        for name in ("COURSE_DRAFT_IMAGE", "COURSE_DEBIAN_ORIGIN"):
+            if name in os.environ:
+                docker += ["-e", name]
     docker += [
         "--cap-add", "SYS_PTRACE", "--user", f"{os.getuid()}:{os.getgid()}",
         "-e", "HOME=/tmp", "-e", f"COURSE_HOST_ROOT={ROOT}",

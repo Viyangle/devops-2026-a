@@ -271,9 +271,10 @@ def draft_for(request, target, out):
     from draft.autobuild import auto_build
 
     if request.get("profile") == "sds":
-        from sds import DOCKERFILE_BROKEN
+        from sds import dockerfile
         # The upstream tree has no Dockerfile. Only the detached target gets this build adapter.
-        (target / "Dockerfile.broken").write_text(DOCKERFILE_BROKEN, encoding="utf-8")
+        broken = dockerfile(request.get("draft_base", "python:3.13-slim"))
+        (target / "Dockerfile.broken").write_text(broken, encoding="utf-8")
     draft = auto_build(
         target, Path(request["candidate"]).resolve(), out / "draft-build",
         request.get("expected_output", "1"), timeout=request.get("build_timeout", 600),

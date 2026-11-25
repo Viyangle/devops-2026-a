@@ -4,10 +4,11 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch as mock_patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "e8e10"))
 from lab import commit, fixture, patch, run, scan, validate
-from sds import BUILD_TARGET, COMPILER_FLAGS, EXPECTED_OUTPUT, HEADER, TARGETS
+from sds import BUILD_TARGET, COMPILER_FLAGS, EXPECTED_OUTPUT, HEADER, TARGETS, dockerfile, write_requests
 
 
 class SdsProfileTests(unittest.TestCase):
@@ -71,6 +72,23 @@ class SdsProfileTests(unittest.TestCase):
         self.assertTrue(result["checks"]["header_test"])
         self.assertEqual((self.root / "validation/test.log").read_text().strip(), EXPECTED_OUTPUT)
         self.assertEqual(json.loads((self.root / "validation/recheck.json").read_text())["findings"], [])
+
+    def test_mirrored_draft_candidate_matches_saved_baseline(self):
+        import prepare
+        from draft.autobuild import prepare_candidate
+
+        base = "registry.example/library/python:3.13-slim"
+        pinned = base + "@sha256:" + "a" * 64
+        with mock_patch("sds.subprocess.run"), mock_patch.multiple(
+            prepare, BASE_IMAGE=base, CANDIDATE_BASE=pinned,
+        ):
+            folder = write_requests(self.project, self.root / "request")
+        request = json.loads((folder / "e12.json").read_text())
+        original = dockerfile(request["draft_base"])
+        candidate = (folder / "candidate.Dockerfile").read_text()
+        baseline = prepare_candidate(original, candidate)
+        self.assertEqual(baseline.splitlines()[0], f"FROM {pinned}")
+        self.assertIn("RUN make sds-test", baseline)
 
     def test_course_default_scan_and_validation_still_work(self):
         project = self.root / "course"
