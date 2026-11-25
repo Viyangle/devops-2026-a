@@ -44,9 +44,11 @@ def main():
             parser.error("Request inside repo and output below work/ required")
         request_mode = json.loads(request.read_text(encoding="utf-8")).get("mode")
 
-    network = "bridge" if args.stage == "serve" else "none"
+    uses_draft = args.stage == "serve" or request_mode in ("e11-b", "e12", "e12-repair")
+    # Buildx exchanges registry auth from this client. Generated programs run networkless.
+    network = "bridge" if uses_draft else "none"
     docker = ["docker", "run", "--rm", "--network", network]
-    if args.stage == "serve" or request_mode in ("e11-b", "e12", "e12-repair"):
+    if uses_draft:
         sock = Path("/var/run/docker.sock")
         docker += ["--group-add", str(sock.stat().st_gid), "-v", f"{sock}:{sock}"]
     if args.stage == "serve":
