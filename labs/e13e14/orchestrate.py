@@ -79,11 +79,15 @@ def execute(request, out):
         if not repo.is_relative_to(ROOT / 'data') or not candidate.is_relative_to(ROOT / 'data'):
             raise pipeline.Failure('INVALID_PATH', 'Input project and candidate must be in data/')
         base, target = out / 'base-project', out / 'target-project'
+        subdir = pipeline.project_subdir(request)
         for revision, project in (('base', base), ('target', target)):
             if not re.fullmatch(r'[0-9a-f]{40}', request[revision]):
                 raise pipeline.Failure('INVALID_REQUEST', 'Use complete Git commit SHAs')
-            result[revision + '_commit'] = pipeline.snapshot(repo, request[revision], project, out / 'logs')
-            pipeline.validate_project(project, request)
+            result[revision + '_commit'] = pipeline.snapshot(repo, request[revision], project, out / 'logs',
+                                                             subdir=subdir)
+            pipeline.validate_project(pipeline.project_directory(project, request), request)
+        base = pipeline.project_directory(base, request)
+        target = pipeline.project_directory(target, request)
         commit = result['target_commit']
         drafted = call('draft', payload(target, out / 'draft-work', stage='draft'), out / 'draft-response.json')
         pipeline.stage(out, result, 'draft', commit, drafted['result'])

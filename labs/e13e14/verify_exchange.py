@@ -91,7 +91,7 @@ class ExchangeRun:
     def source_state(self):
         return {'head': self.git(self.source, 'rev-parse', 'HEAD'),
                 'status': self.git(self.source, 'status', '--porcelain'),
-                'makefile_sha256': digest(self.source / 'Makefile')}
+                'makefile_sha256': digest(pipeline.project_directory(self.source, self.request) / 'Makefile')}
 
     def command(self, name, argv):
         folder = self.output / 'commands'
@@ -192,8 +192,10 @@ class ExchangeRun:
 
     def c5(self):
         folder = self.output / 'c5-rejected-patch'
-        project = folder / 'project'
-        pipeline.snapshot(self.source, self.request['target'], project, folder / 'logs')
+        checkout = folder / 'project'
+        pipeline.snapshot(self.source, self.request['target'], checkout, folder / 'logs',
+                          subdir=pipeline.project_subdir(self.request))
+        project = pipeline.project_directory(checkout, self.request)
         makefile = project / 'Makefile'
         before = {'head': self.git(project, 'rev-parse', 'HEAD'), 'makefile_sha256': digest(makefile)}
         lines = makefile.read_text().splitlines(keepends=True)

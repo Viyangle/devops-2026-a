@@ -96,11 +96,28 @@ def command(argv, cwd, log):
     return log.read_text(encoding="utf-8", errors="replace").strip()
 
 
-def snapshot(repo, revision, dest, logs):
+def project_subdir(request):
+    subdir = Path(request.get("project_subdir", "."))
+    if subdir.is_absolute() or ".." in subdir.parts:
+        raise Failure("INVALID_REQUEST", "project_subdir must be inside the repository")
+    return subdir
+
+
+def project_directory(checkout, request):
+    project = (checkout / project_subdir(request)).resolve()
+    if not project.is_relative_to(checkout.resolve()):
+        raise Failure("INVALID_REQUEST", "project_subdir resolves outside the repository")
+    return project
+
+
+def snapshot(repo, revision, dest, logs, *, subdir=Path(".")):
     sha = command(["git", "rev-parse", "--verify", "--end-of-options", revision + "^{commit}"],
                   repo, logs / f"{dest.name}-resolve.log")
     command(["git", "clone", "--no-hardlinks", "--no-checkout", str(repo), str(dest)],
             repo, logs / f"{dest.name}-clone.log")
+    if subdir.parts:
+        command(["git", "sparse-checkout", "set", "--cone", "--", subdir.as_posix()],
+                dest, logs / f"{dest.name}-sparse.log")
     command(["git", "checkout", "--detach", sha], dest, logs / f"{dest.name}-checkout.log")
     return sha
 
@@ -109,6 +126,9 @@ def project_profile(request):
     name = request.get("profile", "course")
     if name == "course":
         return DEFAULT_TARGETS, {}, "app", {}
+    if name == "b09-greeting":
+        options = {"targets": DEFAULT_TARGETS, "compiler_flags": ["-std=c11", "-Wall", "-Wextra", "-Werror"]}
+        return DEFAULT_TARGETS, options, "app", {**options, "rebuild_header": "extra.h"}
     if name == "sds":
         import sds
         scan_options = {"targets": sds.TARGETS, "compiler_flags": sds.COMPILER_FLAGS}
@@ -145,9 +165,9 @@ def stage(out, result, name, commit, data, filenames=()):
     return reference
 
 
-def analyze_commits(out, result, targets, scan_options, build_target):
-    base = out / "base-project"
-    target = out / "target-project"
+def analyze_commits(request, out, result, targets, scan_options, build_target):
+    base = project_directory(out / "base-project", request)
+    target = project_directory(out / "target-project", request)
     base_full = full(base, out / "baseline-full", build_target)
     baseline = scan(base, **scan_options)
     edges = read(out / "baseline-full/actual-graph.json")
@@ -170,8 +190,8 @@ def analyze_commits(out, result, targets, scan_options, build_target):
                  ("incremental-report.json", "target-full/findings.json"))
 
 
-def repair(out, result, current, reference, build_target, validation_options):
-    target = out / "target-project"
+def repair(request, out, result, current, reference, build_target, validation_options):
+    target = project_directory(out / "target-project", request)
     commit = result["target_commit"]
     before = (target / "Makefile").read_bytes()
     diff, edits = patch(target, current)
@@ -209,7 +229,7 @@ def downstream(request, out, result):
     targets, scan_options, build_target, validation_options = project_profile(request)
     commit = result["target_commit"]
     if mode in ("e11-a", "e12"):
-        reference = analyze_commits(out, result, targets, scan_options, build_target)
+        reference = analyze_commits(request, out, result, targets, scan_options, build_target)
         if mode == "e11-a":
             return
         report = load_artifact(out / "incremental-check.json", reference["sha256"])
@@ -223,7 +243,7 @@ def downstream(request, out, result):
         reference = stage(out, result, "fixed-md", commit, current, ("fixed-md-input.json",))
         current = report_data(load_artifact(out / "fixed-md.json", reference["sha256"]), commit, "fixed-md")
     validation_options["expected_output"] = request.get("expected_output", "1")
-    repair(out, result, current, reference, build_target, validation_options)
+    repair(request, out, result, current, reference, build_target, validation_options)
 
 
 def mark_failure(result, exc):
@@ -302,10 +322,11 @@ def execute(request, out, job_id=None, *, trace_id=None, source_report=None):
         repo = Path(request["repo"]).resolve()
         if not repo.is_dir():
             raise Failure("INVALID_REQUEST", "Repository missing")
+        subdir = project_subdir(request)
         for revision in ("base", "target"):
-            project = out / f"{revision}-project"
-            result[f"{revision}_commit"] = snapshot(repo, request[revision], project, out / "logs")
-            validate_project(project, request)
+            checkout = out / f"{revision}-project"
+            result[f"{revision}_commit"] = snapshot(repo, request[revision], checkout, out / "logs", subdir=subdir)
+            validate_project(project_directory(checkout, request), request)
         commit = result["target_commit"]
         if mode == "e11-b":
             report_path = Path(request["fixed_report"])
@@ -325,7 +346,7 @@ def execute(request, out, job_id=None, *, trace_id=None, source_report=None):
             downstream(request, out, result)
             result["status"] = "SUCCEEDED"
         else:
-            draft = draft_for(request, out / "target-project", out)
+            draft = draft_for(request, project_directory(out / "target-project", request), out)
             stage(out, result, "draft", commit, draft, ("draft-build/result.json",))
             run_in_draft(out, result, draft["attempts"][-1]["image_id"])
     except EXECUTION_ERRORS as exc:

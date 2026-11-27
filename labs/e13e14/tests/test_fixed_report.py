@@ -34,7 +34,7 @@ class FixedReportTests(unittest.TestCase):
         }
 
     def execute(self):
-        def snapshot(repo, revision, destination, logs):
+        def snapshot(repo, revision, destination, logs, *, subdir):
             destination.mkdir(parents=True)
             return revision
 
