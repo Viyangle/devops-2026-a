@@ -307,7 +307,11 @@ def execute(request, out, job_id=None, *, trace_id=None, source_report=None):
             validate_project(project, request)
         commit = result["target_commit"]
         if mode == "e11-b":
-            data = Path(request["fixed_report"]).read_bytes()
+            report_path = Path(request["fixed_report"])
+            if "fixed_report_sha256" in request:
+                data = verified_bytes(report_path, request["fixed_report_sha256"])
+            else:
+                data = report_path.read_bytes()
             report_data(json.loads(data), commit, "fixed-md")
             (out / "fixed-md-input.json").write_bytes(data)
         if mode == "e12-repair":
