@@ -32,7 +32,7 @@ class Contracts(unittest.TestCase):
                      'candidate':str(root/'candidate.Dockerfile'),
                      'input_report':{'uri':'artifact://job-'+'0'*32+'/incremental-check.json',
                                      'sha256':hashlib.sha256(data).hexdigest()}}
-            def snapshot(repo,revision,dest,logs):
+            def snapshot(repo,revision,dest,logs,**kwargs):
                 dest.mkdir(parents=True,exist_ok=True);return revision
             with patch.object(pipeline,'snapshot',side_effect=snapshot),patch.object(pipeline,'validate_project'):
                 result=pipeline.execute(request,root/'out','job-'+'0'*32,trace_id='trace-1',source_report=source)

@@ -1,0 +1,112 @@
+name: E13-E14 integration gate
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  contracts:
+    name: e13e14-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Python and interface contracts
+        run: |
+          python3 -m py_compile labs/e11e12/pipeline.py labs/e13e14/*.py
+          python3 -m unittest discover -s labs/e11e12 -p 'test_contract.py' -v
+          python3 -m unittest discover -s labs/e13e14/tests -p 'test_*.py' -v
+      - name: Compose and source scan
+        run: |
+          E14_ROOT="$PWD" E14_IMAGE=course-e11e12:999999999 docker compose -f labs/e13e14/compose.yaml config --quiet
+          python3 scripts/secret_scan.py . --history
+  four-services:
+    name: e13e14-four-services
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Build pinned teaching image and prepare baseline
+        run: |
+          git config --local user.name 999999999
+          git config --local user.email ci@example.invalid
+          mkdir -p work
+          python3 run_e11e12.py build 2>&1 | tee work/e14-image-build.log
+          python3 run_e11e12.py prepare
+      - name: Run four services, timeout and recovery
+        run: |
+          export E14_ROOT="$PWD" E14_IMAGE=course-e11e12:999999999
+          export E14_UID="$(id -u)" E14_GID="$(id -g)" E14_DOCKER_GID="$(stat -c %g /var/run/docker.sock)"
+          docker image inspect "$E14_IMAGE" > work/e14-image-inspect.json
+          docker compose -f labs/e13e14/compose.yaml -p e14-ci up -d --wait
+          docker compose -f labs/e13e14/compose.yaml -p e14-ci ps --format json > work/e14-services.json
+          python3 labs/e13e14/orchestrate.py --request data/integration-sample/e12.json --out work/ci-e14
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          request = json.loads(Path('data/integration-sample/e12.json').read_text())
+          request['build_timeout'] = 0.01
+          Path('data/e14-timeout.json').write_text(json.dumps(request) + '\n')
+          PY
+          if python3 labs/e13e14/orchestrate.py --request data/e14-timeout.json --out work/ci-e14-timeout; then
+            exit 1
+          fi
+          python3 -c "import json; r=json.load(open('work/ci-e14-timeout/result.json')); assert r['status']=='TIMED_OUT' and r['error']['code']=='DRAFT_FAILED', r"
+          python3 labs/e13e14/orchestrate.py --request data/integration-sample/e12.json --out work/ci-e14-recovery
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          results = []
+          for name in ('ci-e14', 'ci-e14-recovery'):
+              folder = Path('work') / name
+              result = json.loads((folder / 'result.json').read_text())
+              assert result['status'] == 'SUCCEEDED', result
+              assert [item['name'] for item in result['stages']] == ['draft', 'full-check', 'incremental-check', 'repair', 'recheck']
+              prefix = 'artifact://' + result['job_id'] + '/'
+              for item in result['artifacts']:
+                  assert item['uri'].startswith(prefix)
+                  data = (folder / item['uri'][len(prefix):]).read_bytes()
+                  assert (hashlib.sha256(data).hexdigest(), len(data)) == (item['sha256'], item['bytes'])
+              for item in result['stages']:
+                  envelope = json.loads((folder / (item['name'] + '.json')).read_text())
+                  assert (envelope['job_id'], envelope['trace_id']) == (result['job_id'], result['trace_id'])
+              repair = json.loads((folder / 'repair.json').read_text())
+              assert repair['data']['input_report']['sha256'] == hashlib.sha256((folder / 'incremental-check.json').read_bytes()).hexdigest()
+              assert repair['data']['validation']['accepted']
+              recheck = json.loads((folder / 'recheck.json').read_text())
+              assert not any(item['type'] == 'MISSING' for item in recheck['data']['findings'])
+              results.append(result)
+          assert results[0]['job_id'] != results[1]['job_id']
+          print('E14_EVIDENCE_CHECK=PASS')
+          PY
+          python3 labs/e13e14/scan_runtime_logs.py work/ci-e14 work/ci-e14-timeout work/ci-e14-recovery
+      - name: Preserve service logs and stop this Compose project
+        if: always()
+        run: |
+          export E14_ROOT="$PWD" E14_IMAGE=course-e11e12:999999999
+          export E14_UID="$(id -u)" E14_GID="$(id -g)" E14_DOCKER_GID="$(stat -c %g /var/run/docker.sock)"
+          mkdir -p work
+          docker compose -f labs/e13e14/compose.yaml -p e14-ci logs --no-color > work/e14-services.log
+          docker compose -f labs/e13e14/compose.yaml -p e14-ci ps --format json > work/e14-services-final.json
+          docker compose -f labs/e13e14/compose.yaml -p e14-ci down
+          python3 labs/e13e14/scan_runtime_logs.py work/e14-services.log
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: e13e14-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: work/
+          if-no-files-found: warn
+          retention-days: 14
