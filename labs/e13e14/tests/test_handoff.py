@@ -61,8 +61,9 @@ class HandoffTests(unittest.TestCase):
         self.assertEqual(handoff["source_report"]["trace_id"], self.trace)
         self.assertEqual(handoff["source_report"]["uri"],
                          f"artifact://{self.job}/incremental-check.json")
-        self.assertEqual(handoff["source_report"]["sha256"],
-                         hashlib.sha256((self.root / "incremental-check.json").read_bytes()).hexdigest())
+        report = (self.root / "incremental-check.json").read_bytes()
+        self.assertEqual(handoff["source_report"]["sha256"], hashlib.sha256(report).hexdigest())
+        self.assertEqual(handoff["source_report"]["bytes"], len(report))
 
     def test_changed_stage_bytes_are_rejected_against_the_original_manifest(self):
         path = self.root / "incremental-check.json"
