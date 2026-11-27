@@ -65,7 +65,8 @@ def classify_failure(text):
         return "INFRASTRUCTURE"
     return "OTHER_BUILD_ERROR"
 
-def auto_build(fixture, candidate, output, expected_output, timeout=300, verify_timeout=30):
+def auto_build(fixture, candidate, output, expected_output, timeout=300, verify_timeout=30, *,
+               base_image_override=None):
     if os.name != "posix":
         raise ValueError("Run inside the Linux service container")
     fixture, candidate, output = Path(fixture).resolve(), Path(candidate).resolve(), Path(output).resolve()
@@ -81,11 +82,24 @@ def auto_build(fixture, candidate, output, expected_output, timeout=300, verify_
         raise ValueError("Symlink fixtures are unsupported")
     text = candidate.read_text(encoding="utf-8")
     baseline = prepare_candidate((fixture / "Dockerfile.broken").read_text(encoding="utf-8"), text)
+    source_image = instructions(baseline)[0].removeprefix("FROM ")
+    candidate_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    if base_image_override is not None:
+        if not re.fullmatch(r"\S+@sha256:[0-9a-f]{64}", base_image_override):
+            raise ValueError("Build mirror must be a digest-pinned image reference")
+        from_line = re.compile(r"(?m)^[ \t]*FROM\b(?:[^\r\n]*\\\r?\n)*[^\r\n]*")
+        mirror_line = f"FROM {base_image_override}"
+        baseline = from_line.sub(lambda _: mirror_line, baseline, count=1)
+        text = from_line.sub(lambda _: mirror_line, text, count=1)
     output.mkdir(parents=True, exist_ok=True)
     run_id = uuid.uuid4().hex
     report = {"status": "RUNNING", "detector": "DRAFT_TEACHING_REPLAY", "trace_id": "e6-b-" + run_id,
               "candidate_source": "Manual model response replay; no model/API call in this command",
-              "candidate_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(), "attempts": []}
+              "candidate_sha256": candidate_sha, "attempts": []}
+    if base_image_override is not None:
+        report["source_base_image"] = source_image
+        report["effective_base_image"] = base_image_override
+        report["effective_candidate_sha256"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
     started = time.monotonic()
     cid_path = output / "verify-container-id.txt"
     try:

@@ -278,6 +278,7 @@ def draft_for(request, target, out):
     draft = auto_build(
         target, Path(request["candidate"]).resolve(), out / "draft-build",
         request.get("expected_output", "1"), timeout=request.get("build_timeout", 600),
+        base_image_override=request.get("draft_image_override"),
     )
     if draft["status"] != "SUCCEEDED":
         status = "TIMED_OUT" if draft["status"] == "TIMED_OUT" else "FAILED"
