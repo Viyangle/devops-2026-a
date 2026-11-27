@@ -11,6 +11,8 @@
 
 在 Linux Docker 宿主机的仓库根目录运行。保留 E11–E12 的工具镜像。A09 交换项目放到 `data/a09/repo`，将构建候选、完整 base/target SHA 和预期输出填进 `data/a09/request-e12.json`。从 `/course` 起写容器内路径。教师的 jsmn、inih、tiny-AES-c 各有自己的请求和结果。
 
+教师项目需从原始 `candidate.Dockerfile` 派生运行候选，把安装列表中的 `build-essential` 改成 `build-essential git strace`，再将各项目请求的 `candidate` 指向派生文件。原始候选只安装了编译工具，E12 还要在候选镜像内用 Git 核对项目提交，并用 strace 采集实际依赖。[派生文件与摘要](交叉测试记录.md#适配范围与不支持项)
+
 ```bash
 python3 run_e11e12.py test
 python3 -m unittest discover -s labs/e13e14/tests -v
