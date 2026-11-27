@@ -29,7 +29,7 @@ python3 labs/e13e14/verify_exchange.py \
 python3 labs/e13e14/scan_runtime_logs.py work/e13-self-test-02
 ```
 
-正式交换时，仓库和两个 SHA 来自提供方。用 `--scope paired-exchange`、`--provider` 和 `--executor` 记录双方身份。B 接收 A 当次结果后运行 `handoff_a_to_b.py`，将输出文件和它的 SHA-256 填到 `e11-b` 请求的 `fixed_report` 和 `fixed_report_sha256`。
+正式交换时，仓库和两个 SHA 来自提供方。用 `--scope paired-exchange`、`--provider` 和 `--executor` 记录双方身份。B09 的交换包附 `request-b09.json`，其中 `fixed_report_sha256` 校验信封字节，`expected_source_report` 固定 A 原报告的 job、trace、URI、SHA 和字节数。
 
 ## E14
 
